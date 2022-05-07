@@ -1,0 +1,314 @@
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+</head>
+
+<script src="matter.js"></script>
+<style>
+  html, body {
+    background: #FFF;
+    overflow: hidden;
+    font-family: Arial, Helvetica;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background: #f2f2f2;
+    background: -moz-linear-gradient(top, #eaeaea 0%, #f2f2f2 100%);
+    background: -webkit-linear-gradient(top, #eaeaea 0%,#f2f2f2 100%);
+    background: linear-gradient(to bottom, #eaeaea 0%,#f2f2f2 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#eaeaea', endColorstr='#f2f2f2',GradientType=0 );
+    transition: all 2s;
+    animation: appear 2s;
+  }
+
+  @keyframes appear {
+    0% {opacity: 0;}
+    100% {opacity: 1;}
+  }
+
+  #render > canvas {
+    overflow: hidden;
+    position: absolute;
+  }
+
+  #render > .no_pointer_events {
+    pointer-events: none;
+  }
+
+  #render.changeLevel {
+    animation: changeLevelAnimation 1s;
+  }
+
+  #render.changeLevelBack {
+    animation: changeLevelAnimation reverse 1s;
+  }
+
+  @keyframes changeLevelAnimation {
+    0% {transform: translateY(0%)}
+    49% {transform: translateY(0%); opacity: 0;}
+    50% {transform: translateY(0%); opacity: 0}
+    51% {transform: translateY(0%); opacity: 0}
+    52% {opacity: 0}
+    100% {transform: translateY(0%); opacity: 1}
+  }
+
+  #render.resetLevel {
+    animation: resetLevelAnimation 0.5s;
+  }
+
+  @keyframes resetLevelAnimation {
+    0% {opacity: 1}
+    40% {opacity: 0}
+    60% {opacity: 0}
+    100% {opacity: 1}
+  }
+
+  .voice {
+    pointer-events: none;
+    position: absolute;
+    bottom: 5vh;
+    padding: 0 5vh;
+    padding-right: calc(24px + 10vh);
+    width: 100%;
+    font-size: 12px;
+    box-sizing: border-box;
+    color: #555;
+  }
+
+  .music_toggle {
+    position: absolute;
+    top: 5vh;
+    padding: 0 5vh;
+    width: auto;
+    height: 30px;
+    margin-top: -10px;
+    line-height: 30px;
+    font-size: 12px;
+    box-sizing: border-box;
+    color: #444444;
+    animation: appear 2s;
+    padding-top: 2vh;
+  }
+  .music_toggle.hidden {
+    opacity: 0.5;
+  }
+
+  .go-menu {
+    position: absolute;
+    top: 5vh;
+    padding: 0 5vh;
+    width: auto;
+    height: 30px;
+    margin-top: -10px;
+    line-height: 30px;
+    font-size: 12px;
+    box-sizing: border-box;
+    color: #444444;
+    animation: appear 2s;
+    padding-top: 2vh;
+    transition: all 0.2s;
+  }
+
+  .restart {
+    position: absolute;
+    top: 5vh;
+    right: 0;
+    padding: 0 5vh;
+    width: auto;
+    height: 30px;
+    margin-top: -10px;
+    line-height: 30px;
+    font-size: 12px;
+    box-sizing: border-box;
+    color: #444444;
+    animation: appear 2s;
+    padding-top: 2vh;
+    transition: all 0.2s;
+  }
+  .restart.hidden, .go-menu.hidden {
+    opacity: 0;
+  }
+
+  .credit {
+    pointer-events: none;
+    position: absolute;
+    margin: auto;
+    width: 100%;
+    text-align: center;
+    height: 100px;
+    top: 0;
+    font-size: 14px;
+    bottom: 0;
+    color: #888;
+    opacity: 0;
+    transition: 2s;
+    transition-delay: 0s;
+  }
+
+  .credit.visible {
+    opacity: 1;
+    transition: 2s;
+    transition-delay: 5s;
+  }
+
+  .main-menu.hidden {
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .main-menu {
+    position: absolute;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    background: #e7e7e7dd;
+    overflow: auto;
+    padding-top: 20px;
+    transition: all 0.5s;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .main-menu .title {
+    margin-top: 15vh;
+    margin-bottom: 5vh;
+    text-align: center;
+    font-size: 80px;
+    height: 100px;
+  }
+
+  .main-menu .play {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .stages_container {
+    right: 0;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    margin: auto;
+    box-sizing: border-box;
+    height: auto;
+    width: 100%;
+    text-align: center;
+  }
+
+  .stages {
+    display: inline-flex;
+    flex-direction: column-reverse;
+    padding-top: calc(5vh - 5px);
+  }
+
+  .stages .stage_bloc {
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    line-height: 50px;
+    font-size: 13px;
+    color: #444444;
+    margin-bottom: -1px;
+    border: 1px solid rgba(0,0,0,0);
+    animation: stage_bloc_appear 0.5s;
+    overflow: hidden;
+  }
+
+  .stages .stage_bloc.done {
+    transition: all 1s;
+    border: 1px solid #444444;
+    background: #EEEEEE;
+  }
+
+  .stages .stage_bloc.active {
+    transition: all 1s;
+    opacity: 1;
+    background: #444444;
+    color: #e2e2e2;
+  }
+
+  .stages-ground {
+    width: 100%;
+    background: #444;
+    height: 50vh;
+    position: absolute;
+  }
+
+  @keyframes stage_bloc_appear {
+    0% {opacity: 0; height: 0px;margin-bottom: -1px;}
+    100% {opacity: 1; height: 50px; margin-bottom: -1px;}
+  }
+
+  i {
+    width: 20px;
+    height: 20px;
+    display: inline-block;
+    background-position: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+
+  i.i-restart {
+    background-image: url("images/reload.svg");
+  }
+
+  i.i-play {
+    width: 50px;
+    height: 50px;
+    background-image: url("images/play.svg");
+  }
+
+  i.i-menu {
+    background-image: url("images/back.svg");
+    margin-left: -5px;
+  }
+
+  i.i-music {
+    background-image: url("images/music.svg");
+    margin-left: -5px;
+  }
+
+</style>
+
+<div id="mainmenu" class="main-menu">
+
+  <div id="music_toggle" class="music_toggle" onClick="toggleMusic()">
+    <i class="i-music"></i>
+  </div>
+
+  <div class="title">
+    Cube
+  </div>
+
+  <div class="play">
+    <i id="play" class="i-play" onClick="play()"></i>
+  </div>
+
+  <div class="stages_container">
+    <div id="stages" class="stages"></div>
+    <div class="stages-ground"></div>
+  </div>
+
+</div>
+
+<div id="render" style="position: absolute; top: 0px; left: 0px; width: 100%; height: 100%;">
+</div>
+
+<div id="voice" class="voice"></div>
+
+<div id="gomenu" class="go-menu hidden" onClick="menu()">
+  <i class="i-menu"></i>
+</div>
+
+<div id="restart" class="restart hidden" onClick="resetLevel()">
+  <i class="i-restart"></i>
+</div>
+
+
+<div id="credit" class="credit">
+  Thanks for playing <b>Cube</b>
+  <br/><br/>
+  a game created by Romaric Mourgues
+</div>
+
+<script src="levels.js"></script>
+<script src="game.js"></script>
